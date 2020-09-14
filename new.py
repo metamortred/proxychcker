@@ -1,26 +1,15 @@
+from kivymd.app import MDApp
+from kivymd.uix.screen import MDScreen
+from kivy.clock import Clock
+from threading import Thread
+
 import requests
 import re
 import json
 from urllib.parse import quote
 import random
-import threading
-
-# Fixed Screen size as android screen
-from kivy.config import Config
-
-Config.set('graphics', 'width', '360')
-Config.set('graphics', 'height', '740')
-# remove both line when build App
-
-from kivymd.app import MDApp
-from kivy.lang import Builder
-from kivy.uix.screenmanager import ScreenManager
-from kivy.uix.floatlayout import FloatLayout
-from kivymd.uix.tab import MDTabsBase
-from kivymd.uix.label import MDLabel
 
 proxy_list = open('proxy.txt', mode='r', encoding='utf-8').read().split('\n')
-
 
 def checkProxy(proxy):
     proxies = {
@@ -28,47 +17,65 @@ def checkProxy(proxy):
         'https': 'http://' + proxy,
     }
     try:
-        requests.get('http://api.ipify.org/', proxies=proxies).text
+        requests.get('http://api.ipify.org/',proxies=proxies).text
         return True
     except:
         return False
 
-class ProxyApp(MDApp):
+s = requests.Session()
 
-    def change_screen(self, name):
-        screen_manager.current = name
+# Both Use to store data that we want tot show on screen
+line1 = "None"
+line2 = "None"
 
-    def build(self):
-        global screen_manager
-        screen_manager = ScreenManager()
-
-        global outputscreen
-        outputscreen = Builder.load_file("ui//output.kv")
-
-        screen_manager.add_widget(outputscreen)
-
-        self.theme_cls.theme_style = "Dark"
-        self.theme_cls.primary_hue = "A700"
-        self.theme_cls.primary_palette = "Red"
-        print(Builder.load_file('ui//output.kv').ids)
-        return screen_manager
-
-    def show_data(self):
-        output = outputscreen.ids.outputlist
-        #thread = threading.Thread(target=self)
-        #thread.start()
-
-       # thread.join()
-
-        while True:
+def check_fun():
+    """
+        Store proxy ip and msg in line1 and line2
+    """
+    while True:
             chosen = random.choice(proxy_list)
-            output.add_widget(MDLabel(text="Using proxy: {}".format(chosen)))
+            global line1, line2
+            line1 = "Using proxy: {}".format(chosen)
+            print(line1)
             if checkProxy(chosen):
-                output.add_widget(MDLabel(text="Proxy is up!"))
+                line2 = "Proxy is up!"
+                print(line2)
                 break
             else:
-                output.add_widget(MDLabel(text="Proxy is down, trying another!"))
+                line2 = "Proxy is down! Trying one more ..."
+                print(line2)
+
+        
+t1 = Thread(target= check_fun)  
+class Home(MDScreen):
+    def __init__(self, **kw):
+        super().__init__(**kw)
+    
+    def start_checking(self):
+        """
+            Run This Method when play button press 
+        """
+        t1.start() 
+        Clock.schedule_interval(self.update_, 0.5) # every time update screen in .5 sec
+        print("it's work")
+    
+    def update_(self,dt):
+        """
+            Store data ip and msg in line1 and line2 
+            and print it in console
+        """
+        global line1, line2
+        print(line1,line2)
+        self.ids.line1.text = line1
+        self.ids.line2.text = line2
+
+
+
+
+class MainApp(MDApp):
+    def build(self):
+        return Home()
 
 
 if __name__ == "__main__":
-    ProxyApp().run()
+    MainApp().run()
