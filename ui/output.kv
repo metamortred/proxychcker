@@ -1,0 +1,15 @@
+#:kivy 1.0
+MDScreen:
+    name: "output"
+    BoxLayout:
+        orientation:'vertical'
+        MDRaisedButton:
+            text: "click to start"
+            pos_hint: {"center_x":0.5, "center_y":0.4}
+            on_release: app.show_data()
+        ScrollView:
+            pos_hint: {'center_x': .55, 'y': .35}
+            MDList:
+                id: outputlist
+
+
