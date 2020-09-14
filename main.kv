@@ -1,0 +1,17 @@
+<Home>
+    BoxLayout:
+        orientation: "vertical"
+
+        MDToolbar:
+            title: "Proxy Checker"
+            right_action_items: [["play", lambda x: root.start_checking()],["file", lambda x: print("File")]]
+
+        MDLabel:
+            id: line1
+            text: "HEllo"
+            halign: "center"
+        
+        MDLabel:
+            id: line2
+            text: "world"
+            halign: "center"
